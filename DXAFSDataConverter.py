@@ -39,6 +39,49 @@ class ButtonBoxWidget(PyQt4.QtGui.QWidget):
 
         self.setLayout(layout)
 
+class ParametersBoxWidget(PyQt4.QtGui.QWidget):
+    def __init__(self, parent=None):
+        PyQt4.QtGui.QWidget.__init__(self, parent=parent)
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.start_frame_number_label = PyQt4.QtGui.QLabel("Start Frame No.")
+        self.start_frame_number_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.number_of_spectra_label = PyQt4.QtGui.QLabel("Spectra")
+        self.number_of_spectra_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.accumlation_frames_label = PyQt4.QtGui.QLabel("Accumlation Frames")
+        self.accumlation_frames_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.accumlation_frames_box.setRange(1, 32768)
+        self.accumlation_frames_box.setValue(100)
+        self.accumlation_axis_label = PyQt4.QtGui.QLabel("Vertical/Horizontal")
+        self.accumlation_axis_box = PyQt4.QtGui.QComboBox()
+        self.accumlation_axis_box.addItem("Vertical")
+        self.accumlation_axis_box.addItem("Horizontal")
+        self.activate_dark_label = PyQt4.QtGui.QLabel("Read Dark")
+        self.activate_dark_button = PyQt4.QtGui.QPushButton("ON", parent=self)
+        self.activate_dark_button.setCheckable(True)
+        self.activate_dark_button.setChecked(True)
+        self.repeat_blank_and_dark_label = PyQt4.QtGui.QLabel("Repeat Blank and Dark")
+        self.repeat_blank_and_dark_button = PyQt4.QtGui.QPushButton("ON", parent=self)
+        self.repeat_blank_and_dark_button.setCheckable(True)
+        self.repeat_blank_and_dark_button.setChecked(True)
+
+        layout = PyQt4.QtGui.QGridLayout()
+        layout.addWidget(self.start_frame_number_label, 0, 0)
+        layout.addWidget(self.start_frame_number_box, 0, 1)
+        layout.addWidget(self.number_of_spectra_label, 0, 2)
+        layout.addWidget(self.number_of_spectra_box, 0, 3)
+        layout.addWidget(self.accumlation_frames_label, 0, 4)
+        layout.addWidget(self.accumlation_frames_box, 0 ,5)
+        layout.addWidget(self.accumlation_axis_label, 1, 0)
+        layout.addWidget(self.accumlation_axis_box, 1, 1)
+        layout.addWidget(self.activate_dark_label, 1, 2)
+        layout.addWidget(self.activate_dark_button, 1, 3)
+        layout.addWidget(self.repeat_blank_and_dark_label, 1, 4)
+        layout.addWidget(self.repeat_blank_and_dark_button, 1, 5)
+
+        self.setLayout(layout)
+
 class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
     finished = PyQt4.QtCore.pyqtSignal()
     processing = PyQt4.QtCore.pyqtSignal()
@@ -46,6 +89,7 @@ class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
 
     def __init__(self, parent=None):
         PyQt4.QtGui.QWidget.__init__(self, parent=parent)
+        self.parent = parent
         self.setup_ui()
 
     def setup_ui(self):
@@ -117,25 +161,11 @@ class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
         self.calibration_file_box.setText(filename)
         self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
 
-    def kick(self):
-        self.data_file = self.data_file_box.text()
-        self.dark_for_data_file = self.blank_file_box.text()
-        self.blank_file = self.blank_file_box.text()
-        self.dark_for_blank_file = self.dark_for_blank_file_box.text()
-        self.calibration_file = self.calibration_file_box.text()
-        if self.data_file and self.dark_for_data_file and self.blank_file and self.dark_for_blank_file and self.calibration_file:
-            self.processing.emit()
-            convertHIStospectrum(str(self.data_file),
-                                 str(self.dark_for_data_file),
-                                 str(self.blank_file),
-                                 str(self.dark_for_blank_file),
-                                 str(self.calibration_file))
-            self.finished.emit()
-        else:
-            self.missing.emit()
-
 class MainWindow(PyQt4.QtGui.QMainWindow):
     quit = PyQt4.QtCore.pyqtSignal()
+    finished = PyQt4.QtCore.pyqtSignal()
+    processing = PyQt4.QtCore.pyqtSignal()
+    missing = PyQt4.QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         PyQt4.QtGui.QMainWindow.__init__(self, parent=parent)
@@ -143,12 +173,14 @@ class MainWindow(PyQt4.QtGui.QMainWindow):
 
     def setup_ui(self):
         panel = PyQt4.QtGui.QWidget()
-        button_box_widget = ButtonBoxWidget(parent=None)
-        file_dialog_box_widget = FileDialogBoxWidget(parent=None)
+        self.button_box_widget = ButtonBoxWidget(parent=None)
+        self.parameters_box_widget = ParametersBoxWidget(parent=None)
+        self.file_dialog_box_widget = FileDialogBoxWidget(parent=None)
 
         panel_layout = PyQt4.QtGui.QVBoxLayout()
-        panel_layout.addWidget(file_dialog_box_widget)
-        panel_layout.addWidget(button_box_widget)
+        panel_layout.addWidget(self.file_dialog_box_widget)
+        panel_layout.addWidget(self.parameters_box_widget)
+        panel_layout.addWidget(self.button_box_widget)
         panel.setLayout(panel_layout)
         panel.setFixedSize(640, 400)
 
@@ -157,27 +189,57 @@ class MainWindow(PyQt4.QtGui.QMainWindow):
         self.about_action.setShortcut("F1")
         self.help_menu.addAction(self.about_action)
 
-
         self.statusBar().showMessage("Ready!")
         self.setWindowTitle("DXAFS Data Converter")
         self.setCentralWidget(panel)
 
         # connect
-        file_dialog_box_widget.data_file_button.clicked.connect(file_dialog_box_widget.open_data_file)
-        file_dialog_box_widget.dark_for_data_file_button.clicked.connect(file_dialog_box_widget.open_dark_for_data_file)
-        file_dialog_box_widget.blank_file_button.clicked.connect(file_dialog_box_widget.open_blank_file)
-        file_dialog_box_widget.dark_for_blank_file_button.clicked.connect(file_dialog_box_widget.open_dark_for_blank_file)
-        file_dialog_box_widget.calibration_file_button.clicked.connect(file_dialog_box_widget.open_calibration_file)
+        self.file_dialog_box_widget.data_file_button.clicked.connect(self.file_dialog_box_widget.open_data_file)
+        self.file_dialog_box_widget.dark_for_data_file_button.clicked.connect(self.file_dialog_box_widget.open_dark_for_data_file)
+        self.file_dialog_box_widget.blank_file_button.clicked.connect(self.file_dialog_box_widget.open_blank_file)
+        self.file_dialog_box_widget.dark_for_blank_file_button.clicked.connect(self.file_dialog_box_widget.open_dark_for_blank_file)
+        self.file_dialog_box_widget.calibration_file_button.clicked.connect(self.file_dialog_box_widget.open_calibration_file)
 
-        file_dialog_box_widget.finished.connect(lambda: self.statusBar().showMessage("Finished! and Ready again!"))
-        file_dialog_box_widget.processing.connect(lambda: self.statusBar().showMessage("Processing! Please wait for a while."))
-        file_dialog_box_widget.missing.connect(lambda: self.statusBar().showMessage("Missing data file! Please input correct data file paths."))
+        self.finished.connect(lambda: self.statusBar().showMessage("Finished! and Ready again!"))
+        self.processing.connect(lambda: self.statusBar().showMessage("Processing! Please wait for a while."))
+        self.missing.connect(lambda: self.statusBar().showMessage("Missing data file! Please input correct data file paths."))
 
-        button_box_widget.start_button.clicked.connect(file_dialog_box_widget.kick)
-        #button_box_widget.stop_button.clicked.connect()
-        button_box_widget.quit_button.clicked.connect(lambda: self.close())
+        self.button_box_widget.start_button.clicked.connect(self.kick)
+        #self.button_box_widget.stop_button.clicked.connect()
+        self.button_box_widget.quit_button.clicked.connect(lambda: self.close())
 
         self.about_action.triggered.connect(self.show_about)
+
+    def kick(self):
+        self.data_file =  self.file_dialog_box_widget.data_file_box.text()
+        self.dark_for_data_file = self.file_dialog_box_widget.dark_for_data_file_box.text()
+        self.blank_file = self.file_dialog_box_widget.blank_file_box.text()
+        self.dark_for_blank_file = self.file_dialog_box_widget.dark_for_blank_file_box.text()
+        self.calibration_file = self.file_dialog_box_widget.calibration_file_box.text()
+
+        self.start_frame_number = self.parameters_box_widget.start_frame_number_box.value()
+        self.number_of_spectra = self.parameters_box_widget.number_of_spectra_box.value()
+        self.accumlation_frames = self.parameters_box_widget.accumlation_frames_box.value()
+        self.accmulation_axis = self.parameters_box_widget.accumlation_axis_box.currentText()
+        self.activate_dark = self.parameters_box_widget.activate_dark_button.isChecked()
+        self.repeat_black_and_dark = self.parameters_box_widget.repeat_blank_and_dark_button.isChecked()
+
+        if self.data_file and self.dark_for_data_file and self.blank_file and self.dark_for_blank_file and self.calibration_file:
+            self.processing.emit()
+            convertHIStospectrum(str(self.data_file),
+                                 str(self.dark_for_data_file),
+                                 str(self.blank_file),
+                                 str(self.dark_for_blank_file),
+                                 str(self.calibration_file),
+                                 self.start_frame_number,
+                                 self.number_of_spectra,
+                                 self.accumlation_frames,
+                                 self.accmulation_axis,
+                                 self.activate_dark,
+                                 self.repeat_black_and_dark)
+            self.finished.emit()
+        else:
+            self.missing.emit()
 
     def show_about(self):
         msg = __doc__

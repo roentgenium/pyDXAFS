@@ -83,25 +83,30 @@ def ex3toenergy(filename):
     file.close
     return energy
 
-def convertHIStospectrum(datafile, darkfordatafile, blankfile, darkforblankfile, calibrationfile):
+def convertHIStospectrum(datafile, darkfordatafile, blankfile, darkforblankfile, calibrationfile,
+                         start_frame_number, number_of_spectra, accumlation_frames,
+                         accumulation_axis, activate_dark, repeat_black_and_dark
+                         ):
     dataStack, dataStackExposureTime = HIStoArray(datafile)
     darkforDataStack, darkforDataStackExposureTime = HIStoArray(darkfordatafile)
     blankDataStack, blankDataStackExposureTime = HIStoArray(blankfile)
     darkforBlankDataStack, darkforBlankDataStackExposureTime = HIStoArray(darkforblankfile)
-    energy = ex3toenergy(calibrationfile)
-    energy = numpy.array(energy)
+    energy = numpy.array(ex3toenergy(calibrationfile))
 
     i = 0
-    accumulation = 100
+    accumulation = accumlation_frames
     stack = []
-    numberofImages = len(dataStack)
+    #numberofImages = len(dataStack)
 
-    for i in range(0, numberofImages):
+    #for i in range(0, numberofImages):
+    for i in range((start_frame_number - 1), (start_frame_number + accumulation * number_of_spectra - 1)):
         data = dataStack[i]
-        id = i % accumulation
+        id = (i - start_frame_number) % accumulation
+        #id = i % accumulation
         darkfordata = darkforDataStack[id]
         blankdata = blankDataStack[id]
         darkforblank = darkforBlankDataStack[id]
+
         if id == 0:
             dataall = data
             darkfordataall = darkfordata
@@ -113,8 +118,9 @@ def convertHIStospectrum(datafile, darkfordatafile, blankfile, darkforblankfile,
             blankall = blankall + blankdata
             darkforblankall = darkforblankall + darkforblank
 
-        if ((i+1) % accumulation) == 0:
-            spectrum = - numpy.log(numpy.divide( ( (dataall - darkfordataall).astype(numpy.float) / dataStackExposureTime ), ( (blankall - darkforblankall).astype(numpy.float) / blankDataStackExposureTime)))
+        #if ((i + 1) % accumulation) == 0:
+        if ((i - start_frame_number + 1) % accumulation) == 0:
+            spectrum = - numpy.log(numpy.divide(((dataall - darkfordataall).astype(numpy.float) / dataStackExposureTime), ((blankall - darkforblankall).astype(numpy.float) / blankDataStackExposureTime)))
             stack.append(spectrum[::-1])
             del(dataall)
             del(darkfordataall)
