@@ -95,7 +95,6 @@ def convertHIStospectrum(datafile, darkfordatafile, blankfile, darkforblankfile,
 
     i = 0
     stack = []
-
     for i in range((start_frame_number - 1), (start_frame_number + accumulation_frames * number_of_spectra - 1)):
         data = dataStack[i]
         id = i % accumulation_frames
