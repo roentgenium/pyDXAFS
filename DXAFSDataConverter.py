@@ -47,8 +47,11 @@ class ParametersBoxWidget(PyQt4.QtGui.QWidget):
     def setup_ui(self):
         self.start_frame_number_label = PyQt4.QtGui.QLabel("Start Frame No.")
         self.start_frame_number_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.start_frame_number_box.setRange(1, 4096)
         self.number_of_spectra_label = PyQt4.QtGui.QLabel("Spectra")
         self.number_of_spectra_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.number_of_spectra_box.setRange(0, 4096)
+        self.number_of_spectra_box.setValue(0)
         self.accumlation_frames_label = PyQt4.QtGui.QLabel("Accumlation Frames")
         self.accumlation_frames_box = PyQt4.QtGui.QSpinBox(parent=self)
         self.accumlation_frames_box.setRange(1, 32768)
