@@ -6,7 +6,9 @@ pyDXAFS is a small python script to convert .his files obtained at SPring-8, BL2
 
 ## Installation
 
+```
 git@github.com:roentgenium/pyDXAFS.git
+```
 
 ## Usage
 
