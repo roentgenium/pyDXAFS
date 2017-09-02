@@ -1,12 +1,12 @@
 """
-A simple DXAFS data converter obtained at BL28B2, SPring-8.
+A simple converter for DXAFS data obtained at BL28B2, SPring-8.
 
-H. Asakura (h.asakura@nusr.nagoya-u.ac.jp)
+ASAKURA, Hiroyuki (asakura@moleng.kyoto-u.ac.jp)
 License: BSD lisence
-Any comments or suggestions are welcome!
+
 """
 
-__author__  = "Hiroyuki Asakura <h.asakura@nusr.nagoya-u.ac.jp>"
+__author__  = "ASAKURA, Hiroyuki <asakura@moleng.kyoto-u.ac.jp>"
 __license__ = "BSD license - see LICENSE file"
 
 # Standard library
@@ -16,60 +16,61 @@ import sys, os.path
 import numpy
 
 # PyQt4 libaray
-import PyQt4.QtCore
-import PyQt4.QtGui
+import PyQt5.QtCore
+import PyQt5.QtGui
+import PyQt5.QtWidgets
 
 # Original libarary
 from lib.his2spectrum import *
 
-class ButtonBoxWidget(PyQt4.QtGui.QWidget):
+class ButtonBoxWidget(PyQt5.QtWidgets.QWidget):
     def __init__(self, parent=None):
-        PyQt4.QtGui.QWidget.__init__(self, parent=parent)
+        PyQt5.QtWidgets.QWidget.__init__(self, parent=parent)
         self.setup_ui()
 
     def setup_ui(self):
-        self.start_button = PyQt4.QtGui.QPushButton("Start", parent=self)
-        self.stop_button = PyQt4.QtGui.QPushButton("Stop (does not work)", parent=self)
-        self.quit_button = PyQt4.QtGui.QPushButton("Quit", parent=self)
+        self.start_button = PyQt5.QtWidgets.QPushButton("Start", parent=self)
+        self.stop_button = PyQt5.QtWidgets.QPushButton("Stop (does not work)", parent=self)
+        self.quit_button = PyQt5.QtWidgets.QPushButton("Quit", parent=self)
 
-        layout = PyQt4.QtGui.QHBoxLayout()
+        layout = PyQt5.QtWidgets.QHBoxLayout()
         layout.addWidget(self.start_button)
         layout.addWidget(self.stop_button)
         layout.addWidget(self.quit_button)
 
         self.setLayout(layout)
 
-class ParametersBoxWidget(PyQt4.QtGui.QWidget):
+class ParametersBoxWidget(PyQt5.QtWidgets.QWidget):
     def __init__(self, parent=None):
-        PyQt4.QtGui.QWidget.__init__(self, parent=parent)
+        PyQt5.QtWidgets.QWidget.__init__(self, parent=parent)
         self.setup_ui()
 
     def setup_ui(self):
-        self.start_frame_number_label = PyQt4.QtGui.QLabel("Start Frame No.")
-        self.start_frame_number_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.start_frame_number_label = PyQt5.QtWidgets.QLabel("Start Frame No.")
+        self.start_frame_number_box = PyQt5.QtWidgets.QSpinBox(parent=self)
         self.start_frame_number_box.setRange(1, 4096)
-        self.number_of_spectra_label = PyQt4.QtGui.QLabel("Spectra")
-        self.number_of_spectra_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.number_of_spectra_label = PyQt5.QtWidgets.QLabel("Spectra")
+        self.number_of_spectra_box = PyQt5.QtWidgets.QSpinBox(parent=self)
         self.number_of_spectra_box.setRange(0, 4096)
         self.number_of_spectra_box.setValue(0)
-        self.accumlation_frames_label = PyQt4.QtGui.QLabel("Accumlation Frames")
-        self.accumlation_frames_box = PyQt4.QtGui.QSpinBox(parent=self)
+        self.accumlation_frames_label = PyQt5.QtWidgets.QLabel("Accumlation Frames")
+        self.accumlation_frames_box = PyQt5.QtWidgets.QSpinBox(parent=self)
         self.accumlation_frames_box.setRange(1, 32768)
         self.accumlation_frames_box.setValue(100)
-        self.accumlation_axis_label = PyQt4.QtGui.QLabel("Vertical/Horizontal")
-        self.accumlation_axis_box = PyQt4.QtGui.QComboBox()
+        self.accumlation_axis_label = PyQt5.QtWidgets.QLabel("Vertical/Horizontal")
+        self.accumlation_axis_box = PyQt5.QtWidgets.QComboBox()
         self.accumlation_axis_box.addItem("Vertical")
         self.accumlation_axis_box.addItem("Horizontal")
-        self.activate_dark_label = PyQt4.QtGui.QLabel("Read Dark")
-        self.activate_dark_button = PyQt4.QtGui.QPushButton("ON", parent=self)
+        self.activate_dark_label = PyQt5.QtWidgets.QLabel("Read Dark")
+        self.activate_dark_button = PyQt5.QtWidgets.QPushButton("ON", parent=self)
         self.activate_dark_button.setCheckable(True)
         self.activate_dark_button.setChecked(True)
-        self.repeat_blank_and_dark_label = PyQt4.QtGui.QLabel("Repeat Blank and Dark")
-        self.repeat_blank_and_dark_button = PyQt4.QtGui.QPushButton("ON", parent=self)
+        self.repeat_blank_and_dark_label = PyQt5.QtWidgets.QLabel("Repeat Blank and Dark")
+        self.repeat_blank_and_dark_button = PyQt5.QtWidgets.QPushButton("ON", parent=self)
         self.repeat_blank_and_dark_button.setCheckable(True)
         self.repeat_blank_and_dark_button.setChecked(True)
 
-        layout = PyQt4.QtGui.QGridLayout()
+        layout = PyQt5.QtWidgets.QGridLayout()
         layout.addWidget(self.start_frame_number_label, 0, 0)
         layout.addWidget(self.start_frame_number_box, 0, 1)
         layout.addWidget(self.number_of_spectra_label, 0, 2)
@@ -85,32 +86,32 @@ class ParametersBoxWidget(PyQt4.QtGui.QWidget):
 
         self.setLayout(layout)
 
-class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
-    finished = PyQt4.QtCore.pyqtSignal()
-    processing = PyQt4.QtCore.pyqtSignal()
-    missing = PyQt4.QtCore.pyqtSignal()
+class FileDialogBoxWidget(PyQt5.QtWidgets.QWidget):
+    finished = PyQt5.QtCore.pyqtSignal()
+    processing = PyQt5.QtCore.pyqtSignal()
+    missing = PyQt5.QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        PyQt4.QtGui.QWidget.__init__(self, parent=parent)
+        PyQt5.QtWidgets.QWidget.__init__(self, parent=parent)
         self.parent = parent
         self.setup_ui()
 
     def setup_ui(self):
-        self.data_file_label = PyQt4.QtGui.QLabel("Data File")
-        self.data_file_box = PyQt4.QtGui.QLineEdit(parent=self)
-        self.data_file_button = PyQt4.QtGui.QToolButton(parent=self)
-        self.dark_for_data_file_label = PyQt4.QtGui.QLabel("Dark for Data")
-        self.dark_for_data_file_box = PyQt4.QtGui.QLineEdit(parent=self)
-        self.dark_for_data_file_button = PyQt4.QtGui.QToolButton(parent=self)
-        self.blank_file_label = PyQt4.QtGui.QLabel("Blank File")
-        self.blank_file_box = PyQt4.QtGui.QLineEdit(parent=self)
-        self.blank_file_button = PyQt4.QtGui.QToolButton(parent=self)
-        self.dark_for_blank_file_label = PyQt4.QtGui.QLabel("Dark fo Blank")
-        self.dark_for_blank_file_box = PyQt4.QtGui.QLineEdit(parent=self)
-        self.dark_for_blank_file_button = PyQt4.QtGui.QToolButton(parent=self)
-        self.calibration_file_label = PyQt4.QtGui.QLabel("Calibration File")
-        self.calibration_file_box = PyQt4.QtGui.QLineEdit(parent=self)
-        self.calibration_file_button = PyQt4.QtGui.QToolButton(parent=self)
+        self.data_file_label = PyQt5.QtWidgets.QLabel("Data File")
+        self.data_file_box = PyQt5.QtWidgets.QLineEdit(parent=self)
+        self.data_file_button = PyQt5.QtWidgets.QToolButton(parent=self)
+        self.dark_for_data_file_label = PyQt5.QtWidgets.QLabel("Dark for Data")
+        self.dark_for_data_file_box = PyQt5.QtWidgets.QLineEdit(parent=self)
+        self.dark_for_data_file_button = PyQt5.QtWidgets.QToolButton(parent=self)
+        self.blank_file_label = PyQt5.QtWidgets.QLabel("Blank File")
+        self.blank_file_box = PyQt5.QtWidgets.QLineEdit(parent=self)
+        self.blank_file_button = PyQt5.QtWidgets.QToolButton(parent=self)
+        self.dark_for_blank_file_label = PyQt5.QtWidgets.QLabel("Dark fo Blank")
+        self.dark_for_blank_file_box = PyQt5.QtWidgets.QLineEdit(parent=self)
+        self.dark_for_blank_file_button = PyQt5.QtWidgets.QToolButton(parent=self)
+        self.calibration_file_label = PyQt5.QtWidgets.QLabel("Calibration File")
+        self.calibration_file_box = PyQt5.QtWidgets.QLineEdit(parent=self)
+        self.calibration_file_button = PyQt5.QtWidgets.QToolButton(parent=self)
 
         self.current_directory = '.'
 
@@ -120,7 +121,7 @@ class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
         self.dark_for_blank_file = ""
         self.calibration_file = ""
 
-        layout = PyQt4.QtGui.QGridLayout()
+        layout = PyQt5.QtWidgets.QGridLayout()
         layout.addWidget(self.data_file_label, 0, 0)
         layout.addWidget(self.data_file_box, 0, 1)
         layout.addWidget(self.data_file_button, 0, 2)
@@ -140,47 +141,47 @@ class FileDialogBoxWidget(PyQt4.QtGui.QWidget):
         self.setLayout(layout)
 
     def open_data_file(self):
-        filename = PyQt4.QtGui.QFileDialog.getOpenFileName(self, 'Select data file(s)', self.current_directory)
+        filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select data file(s)', self.current_directory)
         self.data_file_box.setText(filename)
-        self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
 
     def open_dark_for_data_file(self):
-        filename = PyQt4.QtGui.QFileDialog.getOpenFileName(self, 'Select dark file for data', self.current_directory)
+        filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select dark file for data', self.current_directory)
         self.dark_for_data_file_box.setText(filename)
-        self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
 
     def open_blank_file(self):
-        filename = PyQt4.QtGui.QFileDialog.getOpenFileName(self, 'Select blank file for data', self.current_directory)
+        filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select blank file for data', self.current_directory)
         self.blank_file_box.setText(filename)
-        self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
 
     def open_dark_for_blank_file(self):
-        filename = PyQt4.QtGui.QFileDialog.getOpenFileName(self, 'Select dark file for blank', self.current_directory)
+        filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select dark file for blank', self.current_directory)
         self.dark_for_blank_file_box.setText(filename)
-        self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
 
     def open_calibration_file(self):
-        filename = PyQt4.QtGui.QFileDialog.getOpenFileName(self, 'Select calibraiton file (.ex3)', self.current_directory)
+        filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select calibraiton file (.ex3)', self.current_directory)
         self.calibration_file_box.setText(filename)
-        self.current_directory = PyQt4.QtCore.QFileInfo(filename).dir().path()
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
 
-class MainWindow(PyQt4.QtGui.QMainWindow):
-    quit = PyQt4.QtCore.pyqtSignal()
-    finished = PyQt4.QtCore.pyqtSignal()
-    processing = PyQt4.QtCore.pyqtSignal()
-    missing = PyQt4.QtCore.pyqtSignal()
+class MainWindow(PyQt5.QtWidgets.QMainWindow):
+    quit = PyQt5.QtCore.pyqtSignal()
+    finished = PyQt5.QtCore.pyqtSignal()
+    processing = PyQt5.QtCore.pyqtSignal()
+    missing = PyQt5.QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
-        PyQt4.QtGui.QMainWindow.__init__(self, parent=parent)
+        PyQt5.QtWidgets.QMainWindow.__init__(self, parent=parent)
         self.setup_ui()
 
     def setup_ui(self):
-        panel = PyQt4.QtGui.QWidget()
+        panel = PyQt5.QtWidgets.QWidget()
         self.button_box_widget = ButtonBoxWidget(parent=None)
         self.parameters_box_widget = ParametersBoxWidget(parent=None)
         self.file_dialog_box_widget = FileDialogBoxWidget(parent=None)
 
-        panel_layout = PyQt4.QtGui.QVBoxLayout()
+        panel_layout = PyQt5.QtWidgets.QVBoxLayout()
         panel_layout.addWidget(self.file_dialog_box_widget)
         panel_layout.addWidget(self.parameters_box_widget)
         panel_layout.addWidget(self.button_box_widget)
@@ -188,7 +189,7 @@ class MainWindow(PyQt4.QtGui.QMainWindow):
         panel.setFixedSize(640, 400)
 
         self.help_menu = self.menuBar().addMenu("&Help")
-        self.about_action = PyQt4.QtGui.QAction("&About", self)
+        self.about_action = PyQt5.QtWidgets.QAction("&About", self)
         self.about_action.setShortcut("F1")
         self.help_menu.addAction(self.about_action)
 
@@ -246,13 +247,12 @@ class MainWindow(PyQt4.QtGui.QMainWindow):
 
     def show_about(self):
         msg = __doc__
-        PyQt4.QtGui.QMessageBox.about(self, "About the DXAFS Data Converter", msg.strip())
+        PyQt5.QtWidgets.QMessageBox.about(self, "About the DXAFS Data Converter", msg.strip())
 
 def main():
-    app = PyQt4.QtGui.QApplication(sys.argv)
+    app = PyQt5.QtWidgets.QApplication(sys.argv)
     main_window = MainWindow()
     main_window.show()
-    app.connect(app, PyQt4.QtCore.SIGNAL("lastWindowClosed()"), app, PyQt4.QtCore.SLOT("quit()"))
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
