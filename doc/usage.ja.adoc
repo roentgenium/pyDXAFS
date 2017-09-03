@@ -1,0 +1,35 @@
+== pyDXAFS の使い方
+
+image: ./images/DDC_01.png[起動時の画面]
+
+Data File::
+  試料測定時のファイル
+Dark for Data::
+  試料測定時に対応した dark のファイル
+Blank File::
+  I0 にあたる測定時のファイル
+Dark to Blank::
+  I0 にあたる測定時に対応した dark のファイル
+Calibration File::
+  同じ測定点数でエネルギーの較正されているREX2000 の .ex3 ファイル
+
+image: ./images/DDC_02.png[パラメータの指定]
+
+Start Frame No.::
+  試料測定時のファイルのうち，何番目のスキャンから変換を始めるか．通常1でよい．
+Spectra::
+  いくつのスペクトルまで変換するか．但し，0 を指定した場合はすべてのイメージを XAFS スペクトルに変換しようと試みる
+Accumlation Frames::
+  何回イメージを積算するか
+Vertical/Horizontal::
+  どの方向でイメージを積算するか．通常 Vertical のままでよい．
+Read Dark::
+  Dark File を利用するかどうか．現在は ON にしかできない．
+Repeat Blank and Dark::
+  試料測定時のファイルに含まれるイメージの数が Blank File や Dark for xxx よりも多い場合，Blank や Dark を繰り返すか．現在は ON にしかできない．
+
+Start をクリックすると，計算が始まり Data File として指定したファイルがあるディレクトリに .dat ファイルができる．
+
+=== 注意点
+
+1つのファイルにあるイメージの数を把握しておき，Spectra や Accumlation Frames に矛盾がないように設定する必要がある．
