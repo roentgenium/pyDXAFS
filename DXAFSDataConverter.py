@@ -142,28 +142,28 @@ class FileDialogBoxWidget(PyQt5.QtWidgets.QWidget):
 
     def open_data_file(self):
         filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select data file(s)', self.current_directory)
-        self.data_file_box.setText(filename)
-        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
+        self.data_file_box.setText(filename[0])
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename[0]).dir().path()
 
     def open_dark_for_data_file(self):
         filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select dark file for data', self.current_directory)
-        self.dark_for_data_file_box.setText(filename)
-        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
+        self.dark_for_data_file_box.setText(filename[0])
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename[0]).dir().path()
 
     def open_blank_file(self):
         filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select blank file for data', self.current_directory)
-        self.blank_file_box.setText(filename)
-        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
+        self.blank_file_box.setText(filename[0])
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename[0]).dir().path()
 
     def open_dark_for_blank_file(self):
         filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select dark file for blank', self.current_directory)
-        self.dark_for_blank_file_box.setText(filename)
-        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
+        self.dark_for_blank_file_box.setText(filename[0])
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename[0]).dir().path()
 
     def open_calibration_file(self):
         filename = PyQt5.QtWidgets.QFileDialog.getOpenFileName(self, 'Select calibraiton file (.ex3)', self.current_directory)
-        self.calibration_file_box.setText(filename)
-        self.current_directory = PyQt5.QtCore.QFileInfo(filename).dir().path()
+        self.calibration_file_box.setText(filename[0])
+        self.current_directory = PyQt5.QtCore.QFileInfo(filename[0]).dir().path()
 
 class MainWindow(PyQt5.QtWidgets.QMainWindow):
     quit = PyQt5.QtCore.pyqtSignal()
@@ -210,7 +210,7 @@ class MainWindow(PyQt5.QtWidgets.QMainWindow):
 
         self.button_box_widget.start_button.clicked.connect(self.kick)
         #self.button_box_widget.stop_button.clicked.connect()
-        self.button_box_widget.quit_button.clicked.connect(lambda: self.close())
+        self.button_box_widget.quit_button.clicked.connect(self.close)
 
         self.about_action.triggered.connect(self.show_about)
 
