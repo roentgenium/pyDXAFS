@@ -8,7 +8,7 @@ def HIStoArray(filename):
     file = open(filename, 'rb')
     header = file.read(64) # read first 64 bytes "IM" header
     while header:
-        if header.startswith("IM"):
+        if b'IM' in header:
             tmp = str(hex(ord(header[3:4]))[2:]) + str(hex(ord(header[2:3]))[2:])
             commentLength = int("0x" + tmp, 0)
             tmp = str(hex(ord(header[5:6]))[2:]) + str(hex(ord(header[4:5]))[2:])
@@ -26,21 +26,21 @@ def HIStoArray(filename):
             b = str(hex(ord(header[14:15]))[2:])
             tmp = a.zfill(2) + b.zfill(2)
             numberofImages = int("0x" + tmp, 0)
-        elif header.startswith("[Application]"):
-            applicationHeader = header.rstrip().split(",")
-        elif header.startswith("[Acquisition]"):
-            acquisitionHeader = header.rstrip().split(',')
+        elif b'[Application]' in header:
+            applicationHeader = header.strip().split(b',')
+        elif b'[Acquisition]' in header:
+            acquisitionHeader = header.strip().split(b',')
             for header in acquisitionHeader:
-                if header.startswith("ExposureTime"):
-                     exposureTime = header.split("=")[1].replace("ms", "").rstrip()
-        elif header.startswith("[Grabber]"):
-            grabberHeader = header.rstrip().split(',')
-        elif header.startswith("[DisplayLUT]"):
-            displayLUTHeader = header.rstrip().split(',')
-        elif header.startswith("[Scaling]"):
-            scalingHeader = header.rstrip().split(',')
-        elif header.startswith("[Camera]"):
-            cameraHeader = header.rstrip().split(',')
+                if b'ExposureTime' in header:
+                     exposureTime = header.split(b'=')[1].replace(b'ms', b'').strip()
+        elif b'[Grabber]' in header:
+            grabberHeader = header.strip().split(b',')
+        elif b'[DisplayLUT]' in header:
+            displayLUTHeader = header.strip().split(b',')
+        elif b'[Scaling]' in header:
+            scalingHeader = header.strip().split(b',')
+        elif b'[Camera]' in header:
+            cameraHeader = header.strip().split(b',')
             break
         header = file.readline()
 
