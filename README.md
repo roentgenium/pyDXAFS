@@ -21,6 +21,7 @@ Please read usage.md in doc.
 ## Environment
 
 - Python 3.6
+- numpy
 - PyQt5
 
 ## Author
