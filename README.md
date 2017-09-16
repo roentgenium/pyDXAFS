@@ -10,13 +10,15 @@ pyDXAFS is a small python script to convert .his files obtained at SPring-8, BL2
 git clone git@github.com:roentgenium/pyDXAFS.git
 ```
 
+or Download ZIP from the green "Clone or download" button.
+
 ## Usage
 
 ```
 python DXAFSDataConverter.py
 ```
 
-Please read usage.md in doc.
+Please read usage.ja.adoc in docs.
 
 ## Environment
 
